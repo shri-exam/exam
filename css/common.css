@@ -1,0 +1,104 @@
+/* Common styles*/
+*{
+    padding: 0;
+    margin: 0;
+}
+html,body
+{
+    height: 100%;
+    background: #d2d8db;
+}
+body
+{
+    position: relative;
+}
+.box_shadow
+{
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Для Firefox */
+    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Для Safari и Chrome */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Параметры тени */
+}
+
+/* Search */
+.search
+{
+    margin: auto;
+    width: 330px;
+}
+.search__input
+{
+    width: 200px;
+    height: 30px;
+    margin-top: 10px;
+    background: #eee;
+    border: 1px solid #555;
+    font-size: 19px;
+}
+.search__btn
+{
+    width: 100px;
+    height: 34px;
+    position: relative;
+    left: -4px;
+    top:-1px;
+    font:bold 14px Tahoma;
+}
+
+/* Album-bar */
+.album-bar__container
+{
+    width: 100%;
+    height: 180px;
+    background: #595959;
+    overflow: hidden;
+}
+.album-bar
+{
+    position: relative;
+}
+.album-bar__button
+{
+    padding: 5px;
+    border: 1px solid #999;
+    display: block;
+    margin: -1px auto -30px auto;
+}
+.album-bar__album-element
+{
+    float: left;
+    width: 75px;
+    border: 5px solid #222;
+    margin-left: 12px;
+}
+.album-bar__album-element:hover
+{
+    border: 5px solid #eee;
+    cursor: pointer;
+}
+img{
+    display: block;
+}
+.album-bar__album-element span
+{
+    background: #ccc;
+    font:10px Segoe UI;
+    color: #222;
+    width: 75px;
+    display: block;
+    text-align: center;
+    border-top: 1px solid #333;
+}
+
+/* Container */
+.container__gradient
+{
+    background-image: linear-gradient(bottom, #D2D8DB 0%, #EAF2F7 70%);
+    background-image: -o-linear-gradient(bottom, #D2D8DB 0%, #EAF2F7 70%);
+    background-image: -moz-linear-gradient(bottom, #D2D8DB 0%, #EAF2F7 70%);
+    background-image: -webkit-linear-gradient(bottom, #D2D8DB 0%, #EAF2F7 70%);
+    background-image: -ms-linear-gradient(bottom, #D2D8DB 0%, #EAF2F7 70%);
+    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #D2D8DB),color-stop(0.7, #EAF2F7));
+    
+    width: 100%;
+    height: 300px;
+}
