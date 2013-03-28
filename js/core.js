@@ -73,7 +73,6 @@ APP.modules.JStpl = function(currentClass) {
 
     // get HTML content
     var content = $('.' + currentClass).html();
-    console.log(currentClass);
     /*  PRIVATE METHODS */  
 
     // render template
@@ -96,5 +95,81 @@ APP.modules.JStpl = function(currentClass) {
     return {
         setParam : setParam,
         getHTML  : getHTML
+    };
+};
+
+/*
+*   @name   - JS Templating 
+*   @type   - DYNAMYC MODULE
+*   @return - Template with render  
+*/
+APP.modules.animation = function(option) {
+
+    /* VARIABLES */
+    var options = {},
+        isPlay = false,
+        timerHandler,
+        randomID,
+        img,
+        bPos = 0;
+    
+    options = {
+        speed : 6,
+        width : 50,
+        height: 50,
+        frames: 0,
+        sWidth: 50,
+        imagePath: "",
+        target: {}
+    };
+    
+    $.extend(options,option);
+    randomID = Math.floor(Math.random() * ( options.speed * options.height * options.width ) * 100);
+
+    img = $('<div class=' + randomID + '/>').css({
+        'width'      : options.width,
+        'height'     : options.height,
+        'background' : 'url('+options.imagePath+')',
+        'border'     : '0'
+    });
+    
+    $('body').append( img );
+    
+    /*  PRIVATE METHODS */  
+
+
+    // begin animation
+    function start () {
+        var FPS = Math.round(1000 / options.speed);
+        timerHandler = setInterval(animate,FPS);
+    };
+
+    // animation process
+    function animate () {
+        bPos+=options.width;
+        if(bPos > (options.width * options.frames) )
+            bPos = options.width;
+        $('.'+randomID).css({'background-position': -bPos+'px 0'});
+    };
+
+    // stop animation
+    function stop () {
+        clearInterval(timerHandler);
+    };
+
+    // hide and remove element
+    function destroy () {
+        stop();
+        $.when($('.'+randomID).fadeOut(300)).then(function(el){
+            el.remove();
+        });    
+    };
+
+    /* PUBLIC METHODS | GETTERS & SETTERS*/
+    
+    return {
+        start   : start,
+        stop    : stop,
+        destroy : destroy
     };
 };
