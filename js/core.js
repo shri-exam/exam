@@ -111,7 +111,8 @@ APP.modules.animation = function(option) {
         timerHandler,
         randomID,
         img,
-        bPos = 0;
+        bPos = 0,
+        style;
     
     options = {
         speed : 6,
@@ -120,23 +121,26 @@ APP.modules.animation = function(option) {
         frames: 0,
         sWidth: 50,
         imagePath: "",
-        target: {}
+        autostart:true
     };
     
     $.extend(options,option);
-    randomID = Math.floor(Math.random() * ( options.speed * options.height * options.width ) * 100);
+    randomID = 'preloader' + Math.floor(Math.random() * ( options.speed * options.height * options.width ) * 100);
 
-    img = $('<div class=' + randomID + '/>').css({
-        'width'      : options.width,
-        'height'     : options.height,
-        'background' : 'url('+options.imagePath+')',
-        'border'     : '0'
-    });
-    
-    $('body').append( img );
-    
+    style = 'width:'
+        +options.width+'px;height:'
+        +options.height+'px;background:url('
+        +options.imagePath+')';
+
+    img = $('<div><div class=' + randomID + ' style=' + style + '/></div>');
+
+
+    // autostart
+    if(options.autostart){
+        start();
+    } 
+
     /*  PRIVATE METHODS */  
-
 
     // begin animation
     function start () {
@@ -165,11 +169,17 @@ APP.modules.animation = function(option) {
         });    
     };
 
+    // get container
+    function getHTML () {
+        return img.html();
+    };
+
     /* PUBLIC METHODS | GETTERS & SETTERS*/
     
     return {
         start   : start,
         stop    : stop,
-        destroy : destroy
+        destroy : destroy,
+        getHTML : getHTML
     };
 };
