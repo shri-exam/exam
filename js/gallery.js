@@ -27,6 +27,7 @@ $(document).ready(function(){
 
     /* Global events */
 
+    // ALBUMS LOADING EVENT
 
     var user = "kuzckin-o";
     
@@ -36,7 +37,7 @@ $(document).ready(function(){
     $.when( APP.modules.YandexPhotoAPI.loadAlbums( user ) ).then(function(albums){
         
         // setup albums container        
-        $('.album-bar__items').width( albums.length * 100 );        
+        $('.album-bar__items').width( albums.length * 98 );        
         $('.album-bar__items').css({"margin":"20px auto"});        
  
         // create view
@@ -63,4 +64,31 @@ $(document).ready(function(){
         });
     });
 
+
+    // SCROLL ALBUMS EVENT
+    var pos = 0;
+    var step = 50;
+    APP.modules.horizontalScroll.addListener('.album-bar',function(delta){
+        
+        // if left limit
+        if(pos < 0 ){
+             pos = 0;
+             return 0;
+        }
+         
+        // calculate right limit
+        var rightLimit = (pos - $('.album-bar__items').width()) * -1;
+        
+        // if right limit
+        if( rightLimit < document.width){
+            pos = ($('.album-bar__items').width()-document.width)-20;
+            return 0;
+        }   
+
+        // scroll container
+        $('.album-bar__items').css({'left':-pos},300);
+        // calculate pos
+        (delta > 0) ? pos += step : pos -= step;
+        
+    });
 });
