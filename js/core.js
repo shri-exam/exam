@@ -13,8 +13,7 @@ APP.modules.YandexPhotoAPI = (function() {
     /* VARIABLES */
     var user,
         leftRightLimit = 10,
-        format = '?format=json',
-        albums = {};
+        format = '?format=json';
 
     /*  PRIVATE METHODS */
 
