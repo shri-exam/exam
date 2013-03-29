@@ -1,6 +1,7 @@
 /* Use namespace */
 APP = {};
 APP.modules = {};
+APP.utilites = {};
 
 
 /*
@@ -183,3 +184,43 @@ APP.modules.animation = function(option) {
         getHTML : getHTML
     };
 };
+
+/*
+*   @name   - JS Horizontal scroll 
+*   @type   - STATIC MODULE
+*   @return - delta  
+*/
+APP.modules.horizontalScroll = (function() {
+
+    /* VARIABLES */
+
+    /*  PRIVATE METHODS */  
+
+
+    // add listener
+    function addListener (elem,event) {
+        
+        // get element
+        var element = $(elem)[0];
+        
+        // add listener
+        if (element.addEventListener) {
+          if ('onwheel' in document) { element.addEventListener ("wheel", event, false);} 
+          if ('onmousewheel' in document) {return element.addEventListener ("mousewheel", returnDelta, false);} 
+          //else { element.addEventListener ("MozMousePixelScroll", event, false);}
+        } else { element.attachEvent ("onmousewheel", function(){return "asd";});}
+   
+        // return delta
+        function returnDelta (e) {
+            e = e || window.event;
+            event(e.deltaY || e.detail || e.wheelDelta);
+        };
+    };
+
+   
+    /* PUBLIC METHODS | GETTERS & SETTERS*/
+    
+    return {
+        addListener : addListener
+    };
+})();
