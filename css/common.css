@@ -8,10 +8,6 @@ html,body
     height: 100%;
     background: #d2d8db;
 }
-body
-{
-    position: relative;
-}
 .box_shadow
 {
     -moz-box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Для Firefox */
@@ -22,6 +18,27 @@ img
 {
     display: block;
     border: 0;
+}
+.loading
+{
+    font:bold 18px Tahoma;
+    color: #999;
+    text-align: center;
+    margin-top: 50px;
+}
+.wrap
+{
+    position: relative;
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 0 -120px 0; /* отрицательный нижний отступ на высоту футера */
+}
+.preloader
+{
+    position:absolute;
+    left:13px;
+    top:10px;
 }
 /* Search */
 .search
@@ -55,6 +72,11 @@ img
     height: 180px;
     background: #595959;
     overflow: hidden;
+    
+}
+.album-bar__items
+{
+    position: relative;   
 }
 .album-bar
 {
@@ -73,6 +95,7 @@ img
     width: 75px;
     border: 5px solid #222;
     margin-left: 12px;
+    position: relative;
 }
 .album-bar__album-element:hover
 {
@@ -102,4 +125,48 @@ img
     
     width: 100%;
     height: 300px;
+}
+.container
+{
+    height: 100%;
+}
+/* Preview-bar */
+
+.preview-bar
+{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+}
+.preview-bar__container
+{
+    
+}
+.preview-bar__bg
+{
+    opacity: 0.2;
+    height: 120px;
+    background: #000;
+    width: 100%;
+    z-index: -1;
+}
+.preview-bar__item
+{
+    float: left;
+    border: 1px solid #888;
+    padding: 10px;
+    margin-left: 10px;
+    opacity: 0.6;
+    position: relative;
+}
+.preview-bar__item:hover
+{
+    border: 1px solid #000;
+    opacity: 1;
+}
+.preview-bar_wrapp
+{
+    overflow: hidden;
+    margin-top: -110px;
 }

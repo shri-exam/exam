@@ -13,12 +13,67 @@ APP.modules.YandexPhotoAPI = (function() {
     /* VARIABLES */
     var user,
         leftRightLimit = 10,
-        format = '?format=json';
+        format = '?format=json',
+        photos = [],
+        currentImage = 0;
 
     /*  PRIVATE METHODS */
 
-    function getImages (albumURL,index) {
-    
+    function clearCache () {
+        photos = [];
+        currentImage = 0;
+    };
+
+    function getNextImages (count) {
+        var imageList = [];
+        var max = count + currentImage;
+        for (i = currentImage; i < max; i++){
+            if (photos[i]) {
+                imageList.push( photos[i] );
+                currentImage++;
+            };
+        };
+        return imageList;
+    };
+    // Create linear structure from all pages
+    function createLinearStructure (url) {
+        
+        var def = $.Deferred();
+
+        // Go read
+        recursive(url)
+        // Recursive read all pages
+        function recursive(url) {
+            $.ajax({type: 'GET',dataType: 'jsonp',url: url}).done(function(data){
+                $.each(data.entries, function(i,item){
+                   
+                   if(item.img.orig){
+
+                        photos.push({
+                            'preview' : item.img.XXS.href,
+                            'original': item.img.orig.href,
+                            'id' : item.id
+                        });
+
+                    }    
+                });
+                if(data.links.next)
+                    recursive(data.links.next);
+                else{
+                    def.resolve();
+                };
+            });
+        };
+        // return promise    
+        return def.promise();
+
+    };
+
+    function loadImages (url) {
+        photos = [];
+        return $.when( createLinearStructure(url) ).then(function(){
+            // all images loading  
+        });
     };
 
     // Read service document
@@ -57,7 +112,10 @@ APP.modules.YandexPhotoAPI = (function() {
 
     /* PUBLIC METHODS | GETTERS & SETTERS*/
     return {
-        loadAlbums: getAlbums
+        loadAlbums: getAlbums,
+        loadImages: loadImages,
+        getNextImages : getNextImages,
+        clearCache : clearCache
     };
 })();
 

@@ -8,10 +8,33 @@ $(document).ready(function(){
     /* Event listeners */
     $('.album-bar__button').bind('click', toggleAlbumBar);
     $('.search__btn').bind('click', searchAlbums);
-
+    $('.album-bar').delegate('img','click', loadImages);
 
 
     /* Realisation listeners */
+
+    // Loadi images from album
+    function loadImages () {
+        var url = $(this).data('photos');
+        
+        APP.modules.YandexPhotoAPI.clearCache();
+        $('.preview-bar__container').empty();
+
+        $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
+            
+            var previews =  APP.modules.YandexPhotoAPI.getNextImages(20);
+            var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+
+            var count = $('.preview-bar__container').children().size() + previews.length;
+
+            $('.preview-bar__container').width( count * 107 );
+
+            $.each(previews,function(index,item) {
+                viewPreview.setParam({'src':item.preview});
+                $('.preview-bar__container').append( viewPreview.getHTML() );
+            });   
+        });
+    };
 
     // Search albums of user
     function searchAlbums () {
@@ -31,14 +54,14 @@ $(document).ready(function(){
             $('.album-bar__items').css({"margin":"20px auto"});        
      
             // create view
-            viewBarElement = new APP.modules.JStpl('templates.album-bar__items__item-templ');
+            var viewBarElement = new APP.modules.JStpl('templates.album-bar__items__item-templ');
             
             $.each(albums,function(index,item) {
                 // create preloader animation
                 var preloader = new APP.modules.animation({'speed':50,'frames':12,'imagePath':'./img/sprites.png'});
                 
                 // templating
-                viewBarElement.setParam({'id' : item.id, 'imageCount' : item.count,'src':'./img/clear.png','preloader': preloader.getHTML()});
+                viewBarElement.setParam({'photos':item.href, 'id' : item.id, 'imageCount' : item.count,'src':'./img/clear.png','preloader': preloader.getHTML()});
                 // add template to DOM
                 $('.album-bar__items').append( viewBarElement.getHTML() );
                 
@@ -62,12 +85,12 @@ $(document).ready(function(){
         switch( $(this).text() ){
             case "Закрыть" :{
                 $(this).text("Открыть");
-                $('body').animate({top:"-180"},400);
+                $('.wrap').animate({top:"-180"},400);
                 break;
             }
             case "Открыть" :{
                 $(this).text("Закрыть");
-                $('body').animate({top:"0"},300);
+                $('.wrap').animate({top:"0"},300);
             }
         }
     };

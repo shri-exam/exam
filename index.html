@@ -12,39 +12,56 @@
 	</head>
 <body>
 
-	
-	<div class="album-bar">
-		<div class="album-bar__container">
-			<div class="search">
-				<input  class="search__input" type="edit">
-				<button class="search__btn">ИСКАТЬ</button>
-			</div>
-			<div class="album-bar__items">
-				<script class="templates album-bar__items__item-templ" type="templ/html">
-				    <div class="album-bar__elements">
-				        <div class="album-bar__album-element box_shadow">
-				            <img src="{{src}}" width="75" height="75">
-				            <span><b>{{imageCount}}</b> фото</span>
-				        </div>
-				    </div>
-				</script>
-			</div>
-		</div>
-		<button class="album-bar__button">Закрыть</button>
-	</div>
+	<script class="templates album-bar__items__item-templ" type="templ/html">
+	    <div class="album-bar__elements">
+	        <div class="album-bar__album-element box_shadow">
+	        	<div class="preloader">{{preloader}}</div>
+	            <img data-photos="{{photos}}" src="{{src}}" width="75" height="75">
+	            <span data-id="{{id}}"><b>{{imageCount}}</b> фото</span>
+	        </div>
+	    </div>
+	</script>
 
-	<div class="container">
-		<div class="container__gradient"></div>
-		<span class="container__arrow-left"></span>
-		<span class="container__arrow-right"></span>
-		<div class="container__image">
-			<div class="container__image-current"></div>
-			<div class="container__image-prev"></div>
-			<div class="container__image-next"></div>
+	<script class="templates preview-bar__container-item-templ" type="templ/html">
+		<img class="preview-bar__item" src="{{src}}" width="75" height="75">
+	</script>
+
+
+	<div class="wrap">
+
+		<div class="album-bar">
+			<div class="album-bar__container">
+				<div class="search">
+					<input  class="search__input" type="edit">
+					<button class="search__btn">ИСКАТЬ</button>
+				</div>
+				<div class="album-bar__items">
+					<!-- Template -->
+				</div>
+			</div>
+			<button class="album-bar__button">Закрыть</button>
 		</div>
+
+		<div class="container">
+			<div class="container__gradient"></div>
+			<span class="container__arrow-left"></span>
+			<span class="container__arrow-right"></span>
+			<div class="container__image">
+				<div class="container__image-current"></div>
+				<div class="container__image-prev"></div>
+				<div class="container__image-next"></div>
+			</div>
+		</div>
+
 	</div>
 
 	<div class="preview-bar">
+		<div class="preview-bar__bg">asdasd</div>
+		<div class="preview-bar_wrapp">
+			<div class="preview-bar__container">
+				<!-- Template -->
+			</div>
+		</div>
 	</div>
 
 </body>
