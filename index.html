@@ -25,7 +25,7 @@
 	<script class="templates preview-bar__container-item-templ" type="templ/html">
 		<div class="preview-bar__border">
 			<div style="position:absolute;left:17px;top:17px;">{{preloader}}</div>
-			<img data-id="{{id}}" class="preview-bar__item" src="{{src}}" width="75" height="75">
+			<img data-src="{{origin}}" data-id="{{id}}" class="preview-bar__item" src="{{src}}" width="75" height="75">
 		</div>
 	</script>
 
@@ -46,7 +46,6 @@
 		</div>
 
 		<div class="container">
-			<div class="container__gradient"></div>
 			<span class="container__arrow-left"></span>
 			<span class="container__arrow-right"></span>
 			<div class="container__image">
