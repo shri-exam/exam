@@ -19,10 +19,12 @@ $(document).ready(function(){
         
         APP.modules.YandexPhotoAPI.clearCache();
         $('.preview-bar__container').empty();
+        $('.preview-bar__container').css({'left':'0'});
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
             
-           loadNextPhoto(30);
+            // load photo on width screen
+            loadNextPhoto( Math.round($(document).width() / 92) );
 
         });
     };
@@ -37,11 +39,24 @@ $(document).ready(function(){
         $('.preview-bar__container').width( (count * 92)+10 );
         $('.preview-bar__container').css({'margin':'0 auto'});
 
+        var preloader = new APP.modules.animation({'speed':50,'frames':12,'imagePath':'./img/sprites.png'});
+
         $.each(photos,function(index,item) {
-            viewPreview.setParam({'src':item.preview});
+            viewPreview.setParam({'src':'./img/clear.png','id':item.id,'preloader':preloader.getHTML()});
             $('.preview-bar__container').append( viewPreview.getHTML() );
+
+            // async image loading
+            $('<img>').attr('src',item.preview).load(function(){
+                // hide image
+                $('img[data-id="'+item.id+'"]').attr('src',item.preview).hide();
+                // show image
+                $('img[src="'+item.preview+'"]').fadeIn(1000);
+                // remove preloader animation
+                preloader.destroy();
+            });
+
         });  
-    }
+    };
 
     // Search albums of user
     function searchAlbums () {
@@ -119,8 +134,8 @@ $(document).ready(function(){
         var rightLimit = (pos - $('.album-bar__items').width()) * -1;
         
         // if right limit
-        if( rightLimit < document.width){
-            pos = ($('.album-bar__items').width()-document.width);
+        if( rightLimit < $(document).width()){
+            pos = ($('.album-bar__items').width()-$(document).width());
             return 0;
         }   
 
@@ -133,7 +148,7 @@ $(document).ready(function(){
 
     // SCROLL PHOTOS EVENT
     var photoPos = 0;
-    var photoStep = 50;
+    var photoStep = 30;
     var limitToLoad = 92 * 1; // elements-width * limit count 
     APP.modules.horizontalScroll.addListener('.preview-bar',function(delta){
         
@@ -147,12 +162,12 @@ $(document).ready(function(){
         var rightLimit = ($('.preview-bar__container').width() - photoPos);
         
         // if right limit
-        if( rightLimit < document.width){
-            photoPos = ($('.preview-bar__container').width()-document.width);
+        if( rightLimit < $(document).width()){
+            photoPos = ($('.preview-bar__container').width()-$(document).width());
             return 0;
         }   
         // if right limit
-        if( rightLimit < document.width + limitToLoad){
+        if( rightLimit < $(document).width() + limitToLoad){
             loadNextPhoto(10);
         }   
 

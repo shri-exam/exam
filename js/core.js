@@ -55,7 +55,7 @@ APP.modules.YandexPhotoAPI = (function() {
                             'id' : item.id
                         });
 
-                    }    
+                    };    
                 });
                 if(data.links.next)
                     recursive(data.links.next);
