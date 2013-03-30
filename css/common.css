@@ -32,7 +32,7 @@ img
     min-height: 100%;
     height: auto !important;
     height: 100%;
-    margin: 0 0 -120px 0; /* отрицательный нижний отступ на высоту футера */
+    margin: 0 0 -100px 0; /* отрицательный нижний отступ на высоту футера */
 }
 .preloader
 {
@@ -141,12 +141,12 @@ img
 }
 .preview-bar__container
 {
-    
+    position: relative;
 }
 .preview-bar__bg
 {
     opacity: 0.2;
-    height: 120px;
+    height: 100px;
     background: #000;
     width: 100%;
     z-index: -1;
@@ -155,8 +155,8 @@ img
 {
     float: left;
     border: 1px solid #888;
-    padding: 10px;
-    margin-left: 10px;
+    padding: 5px;
+    margin-left: 5px;
     opacity: 0.6;
     position: relative;
 }
@@ -168,5 +168,5 @@ img
 .preview-bar_wrapp
 {
     overflow: hidden;
-    margin-top: -110px;
+    margin-top: -93px;
 }

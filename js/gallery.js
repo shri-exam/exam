@@ -22,19 +22,26 @@ $(document).ready(function(){
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
             
-            var previews =  APP.modules.YandexPhotoAPI.getNextImages(20);
-            var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+           loadNextPhoto(30);
 
-            var count = $('.preview-bar__container').children().size() + previews.length;
-
-            $('.preview-bar__container').width( count * 107 );
-
-            $.each(previews,function(index,item) {
-                viewPreview.setParam({'src':item.preview});
-                $('.preview-bar__container').append( viewPreview.getHTML() );
-            });   
         });
     };
+
+    // For load next photo
+    function loadNextPhoto (count) {
+        var photos =  APP.modules.YandexPhotoAPI.getNextImages(count);
+        var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+
+        var count = $('.preview-bar__container').children().size() + photos.length;
+
+        $('.preview-bar__container').width( (count * 92)+10 );
+        $('.preview-bar__container').css({'margin':'0 auto'});
+
+        $.each(photos,function(index,item) {
+            viewPreview.setParam({'src':item.preview});
+            $('.preview-bar__container').append( viewPreview.getHTML() );
+        });  
+    }
 
     // Search albums of user
     function searchAlbums () {
@@ -121,6 +128,38 @@ $(document).ready(function(){
         $('.album-bar__items').css({'left':-pos},300);
         // calculate pos
         (delta > 0) ? pos += step : pos -= step;
+
+    });
+
+    // SCROLL PHOTOS EVENT
+    var photoPos = 0;
+    var photoStep = 50;
+    var limitToLoad = 92 * 1; // elements-width * limit count 
+    APP.modules.horizontalScroll.addListener('.preview-bar',function(delta){
+        
+        // if left limit
+        if(photoPos < 0 ){
+             photoPos = 0;
+             return 0;
+        }
+ 
+        // calculate right limit
+        var rightLimit = ($('.preview-bar__container').width() - photoPos);
+        
+        // if right limit
+        if( rightLimit < document.width){
+            photoPos = ($('.preview-bar__container').width()-document.width);
+            return 0;
+        }   
+        // if right limit
+        if( rightLimit < document.width + limitToLoad){
+            loadNextPhoto(10);
+        }   
+
+        // scroll container
+        $('.preview-bar__container').css({'left':-photoPos},300);
+        // calculate photoPos
+        (delta > 0) ? photoPos += photoStep : photoPos -= photoStep;
 
     });
 });
