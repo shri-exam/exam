@@ -28,18 +28,21 @@ $(document).ready(function(){
 
 
     function left () {
+        
         if(indexPrev-2 >= 0){    
             $('.preview-bar img').eq(indexPrev-2).click();
         }
         if( $('.preview-bar img').size() * 92 < $(document).width()  ){
             return;
         }
-            photoPos -= 92;    
+        
+        photoPos -= 92;    
 
         if(photoPos < 0 ){
              photoPos = 0;
         }
-             $('.preview-bar__container').css({'left':-photoPos});
+        
+        $('.preview-bar__container').css({'left':-photoPos});
 
     };
 
@@ -148,6 +151,8 @@ $(document).ready(function(){
     var indexPrev = 0;
     var prevImage = null;
     var prevWidth = 200;
+    var maxPreloadeLeftRight = 5;
+
     function loadLargeImages () {
 
 
@@ -155,6 +160,7 @@ $(document).ready(function(){
         var id = $(this).data('id');
         var index = $(this).data('index');
 
+        
         if(index * 92 > $('body').width()/2)
             loadNextPhoto( 10 );
 
@@ -235,6 +241,18 @@ $(document).ready(function(){
                 $('.container__image-prev div.wr').appendTo('.container__image-current');
                 
             });           
+        }
+
+        // Preloade Larg image
+        for(i=index-maxPreloadeLeftRight;i<=index+maxPreloadeLeftRight-1;i++){
+             
+            if(i<0) continue;
+            if(i> $('.preview-bar img').size()) continue;
+            
+            var url = $('.preview-bar img').eq(i).data('src'); 
+            $('<img>').attr('src',url).load(function(){
+                // loading
+            });
         }
 
         indexPrev = index;
