@@ -72,6 +72,9 @@ $(document).ready(function(){
 
         $('.container__image-current div.wr').remove();
         
+        $('.album-bar img').closest('div').removeClass('act');
+        $(this).closest('div').addClass('act');
+
         APP.modules.YandexPhotoAPI.clearCache();
         $('.preview-bar__container').empty();
         $('.preview-bar__container').css({'left':'0'});
@@ -102,6 +105,9 @@ $(document).ready(function(){
         var url = $(this).data('src');
         var id = $(this).data('id');
         var index = $(this).data('index');
+
+        $('.preview-bar img').closest('div').removeClass('preview-bar__border-active');
+        $(this).closest('div').addClass('preview-bar__border-active');
 
         if( index === indexPrev ){
             return 0;

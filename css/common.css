@@ -99,6 +99,10 @@ img
     margin-left: 12px;
     position: relative;
 }
+.act
+{
+ border: 5px solid #eee;   
+}
 .album-bar__album-element:hover
 {
     border: 5px solid #eee;
@@ -154,6 +158,11 @@ img
 .preview-bar__border:hover
 {
     border: 1px solid #000;
+    opacity: 1;
+}
+.preview-bar__border-active
+{
+    border: 1px solid #000!important;
     opacity: 1;
 }
 .preview-bar__border
