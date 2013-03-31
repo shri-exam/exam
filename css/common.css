@@ -163,6 +163,7 @@ img
 .preview-bar__border-active
 {
     border: 1px solid #000!important;
+    background: #fff;
     opacity: 1;
 }
 .preview-bar__border
@@ -199,4 +200,30 @@ img
 {
     position: absolute;
     
+}
+
+.left
+{
+    background: url('../img/left.png');
+    width: 55px;
+    height: 54px;
+    border: 0;
+    cursor: pointer;
+    margin: 10px;
+}
+.right
+{
+    background: url('../img/right.png');
+    width: 55px;
+    height: 54px;
+    border: 0;
+    cursor: pointer;
+    float: right;
+    margin: 10px;
+}
+.cnts
+{
+    position: absolute;
+    height: 80px;
+    width: 100%;
 }
