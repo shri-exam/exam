@@ -45,14 +45,17 @@ APP.modules.YandexPhotoAPI = (function() {
         // Recursive read all pages
         function recursive(url) {
             $.ajax({type: 'GET',dataType: 'jsonp',url: url}).done(function(data){
+                //console.log(data);
                 $.each(data.entries, function(i,item){
                    
                    if(item.img.orig){
 
                         photos.push({
                             'preview' : item.img.XXS.href,
-                            'original': item.img.orig.href,
-                            'id' : item.id
+                            //'original': item.img.origin.href, // High load page!
+                            'original': item.img.XL.href,
+                            'id' : item.id,
+                            'index' : photos.length+1
                         });
 
                     };    

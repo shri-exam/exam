@@ -6,7 +6,7 @@
 html,body
 {
     height: 100%;
-    background: url('../img/bg.png');
+    overflow: hidden;
 }
 .box_shadow
 {
@@ -29,9 +29,6 @@ img
 .wrap
 {
     position: relative;
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
     margin: 0 0 -100px 0; /* отрицательный нижний отступ на высоту футера */
     background: url('../img/bg.png');
 }
@@ -118,6 +115,7 @@ img
 .container
 {
     height: 100%;
+    overflow: hidden;
 }
 /* Preview-bar */
 
@@ -134,7 +132,7 @@ img
 }
 .preview-bar__bg
 {
-    opacity: 0.2;
+    opacity: 0.5;
     height: 100px;
     background: #000;
     width: 100%;
@@ -156,7 +154,7 @@ img
 }
 .preview-bar__border
 {
-    opacity: 0.6;
+    opacity: 0.8;
     position: relative;
     float: left;
     border: 1px solid #888;
@@ -164,3 +162,28 @@ img
     margin-left: 5px;
 }
 /* Large image */
+
+.container img
+{
+    display: block;
+}
+.wr{
+ margin:30px auto 10px auto;
+ border: 5px solid #eee;
+ background: #333;
+}
+.container__image-current
+{
+
+}
+.container__image-next
+{
+    position: absolute;
+    left: 900px;
+    
+}
+.container__image-prev
+{
+    position: absolute;
+    
+}
