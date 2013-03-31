@@ -67,22 +67,35 @@ $(document).ready(function(){
     // Load images from album
     function loadImages () {
         var url = $(this).data('photos');
+
+        $('.album-bar').undelegate('img','click', loadImages);
+
+        $('.container__image-current div.wr').remove();
         
         APP.modules.YandexPhotoAPI.clearCache();
         $('.preview-bar__container').empty();
         $('.preview-bar__container').css({'left':'0'});
+
+        $('.container__image-current').append( '<h1 style="text-align:center;margin-top:100px;">Loading photos...</h1>' );
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
             
             // load photo on width screen
             loadNextPhoto( Math.round($(document).width() / 92) );
 
+            $('.container__image-current h1').remove();
+
+            $('.album-bar').delegate('img','click', loadImages);
+            indexPrev = 0;
+            $('.preview-bar img:first').click();
+            
         });
     };
 
     // Load large images
     var indexPrev = 0;
     var prevImage = null;
+    var prevWidth = 200;
     function loadLargeImages () {
 
 
@@ -102,22 +115,33 @@ $(document).ready(function(){
             ps = 60;
         }
 
+
+        var preloader = new APP.modules.animation({'width':128,'height':128,'speed':50,'frames':12,'imagePath':'./img/sprites-lar.png'});
+
         var img = $('<img>').attr('src',url).load(function(){
             
             img.css({'width':'auto'});
-            img.fadeIn(1000);
-            $('.wr').animate({'width':img.width(),'height':img.height()},900);
+            img.fadeIn(2000);
+            $('.wr').animate({'width':img.width(),'height':img.height()},700);
+            prevWidth = img.width();
+            preloader.destroy();
 
         });//.addClass('box_shadow');
         img.css({'height': $('body').height()-ps });
-        
+            
 
         //img.height(  );
         img.hide();
 
-        dv = $('<div style="position:relative;" class="wr" />').append(img);
+        prel = $('<div class="preloader-lrg">'+preloader.getHTML()+'</div>');
+        dv = $('<div style="position:relative;" class="wr">').append(img).append(prel);
+                
         dv.height($('body').height()-ps).addClass('box_shadow');
-        dv.width($('body').height()-ps);
+        //dv.width($('body').height()-ps);
+        dv.width(prevWidth);
+
+        prel.css({'left':(dv.width()/2) - 64, 'top':dv.height()/2 -64 });
+
 
         var position = ($(document).width() / 2) - (dv.width() / 2);
 

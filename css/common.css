@@ -38,6 +38,10 @@ img
     left:13px;
     top:10px;
 }
+.preloader-lrg
+{
+    position: absolute;
+}
 /* Search */
 .search
 {
