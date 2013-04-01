@@ -4,6 +4,9 @@ $(document).ready(function(){
 
     // BUG: CLOSE ALBUM-BAR WHEN image loading!!!!
 
+
+    var storage = window.localStorage;
+
     // preloader sprite
     $('<img>').attr('src','./img/sprites.png');
     $('.wrap').height( $('body').height()*2 );
@@ -43,7 +46,7 @@ $(document).ready(function(){
             $('.preview-bar img[data-index="'+(indexPrev-1)+'"]').click();
         }
         if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-           // return;
+            return;
         }
 
         photoPos -= 92;    
@@ -54,7 +57,6 @@ $(document).ready(function(){
         }
        
         $('.preview-bar__container').css({'left':-photoPos});
-        console.log("left - " + indexPrev);
 
     };
 
@@ -63,7 +65,7 @@ $(document).ready(function(){
         $('.preview-bar img[data-index="'+(indexPrev+1)+'"]').click();
         
         if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-            //return;
+            return;
         }
 
         var rightLimit = ($('.preview-bar__container').width() - photoPos)  -92;
@@ -77,7 +79,7 @@ $(document).ready(function(){
         } 
 
         $('.preview-bar__container').css({'left':-photoPos});
-        console.log("right - " + indexPrev);
+
 
     };  
 
@@ -155,7 +157,7 @@ $(document).ready(function(){
         $('.preview-bar__container').empty();
         $('.preview-bar__container').css({'left':'0'});
 
-        $('.container__image-current').append( '<h1 style="text-align:center;margin-top:100px;">Loading photos...</h1>' );
+        $('.container__image-current').append( '<h1 style="text-align:center;margin-top:100px;">Loading photos...</h1>' ).addClass('loading-l');
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
             var user = $('.search__input').val();
@@ -164,21 +166,38 @@ $(document).ready(function(){
                 var data =  ( JSON.parse( localStorage.getItem(user) ) );
                 if(data.album === idAlbum){
                     APP.modules.YandexPhotoAPI.setCurrent( data.image );
-                    loadNextPhoto(10);
-                    loadPrevPhoto(10);
-                    //
-
-                    //
+                    var nextLoaded = loadNextPhoto(20);
+                    var prevLoaded = loadPrevPhoto(20);
                     $('.preview-bar img[data-id="'+data.image+'"]').click();
                     indexPrev = $('.preview-bar img[data-id="'+data.image+'"]').data('index');
+
+                    var search = $('.preview-bar img[data-id="'+data.image+'"]').parent();
+                    var cn = ($('.preview-bar div.preview-bar__border').index( search )  * 92) - ($(document).width() / 2);
+                    photoPos = cn;
+                    
+                    if( nextLoaded  * 92 < $(document).width() / 2)
+                    {
+                       cn = $('.preview-bar__container').width()- $(document).width();
+                       photoPos = cn;
+                    }
+                    if( prevLoaded * 92 < $(document).width() / 2 ){
+                        cn = photoPos = 0;
+                    }
+
+                    $('.preview-bar__container').css({'left':-(cn)});
                 }else{
                     APP.modules.YandexPhotoAPI.setCurrent( 0 );
                     loadNextPhoto( Math.round($(document).width() / 92) +20 );
                     indexPrev = -1;
-                    $('.preview-bar img:first').click();
+                    $('.preview-bar img:first').click();    
                 }
-            }else    
-                indexPrev = 0;   
+            }else{
+                    APP.modules.YandexPhotoAPI.setCurrent( 0 );
+                    loadNextPhoto( Math.round($(document).width() / 92) +20 );
+                    indexPrev = -1;
+                    $('.preview-bar img:first').click();    
+
+            }
 
             $('.container__image-current h1').remove();
             $('.album-bar').delegate('img','click', loadImages);
@@ -271,7 +290,6 @@ $(document).ready(function(){
 
         var position = ($(document).width() / 2) - (dv.width() / 2);
 
-        console.log("index - " + index + " | indexPrev - " + indexPrev)
 
         if(index > indexPrev){
             // slide next
@@ -423,7 +441,8 @@ $(document).ready(function(){
             $('.search__btn').bind('click', searchAlbums);
 
             // If ssave state
-            if( localStorage.getItem(user) != null ){
+
+           if( localStorage.getItem(user) != null ){
                 var data =  ( JSON.parse( localStorage.getItem(user) ) );
                 $('span[data-id="'+data.album+'"]').parent().find('img').click();
             }
@@ -431,6 +450,7 @@ $(document).ready(function(){
 
         });
     };
+
 
     // Toggle albums panel
     function toggleAlbumBar ( event ) {

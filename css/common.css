@@ -26,6 +26,11 @@ img
     text-align: center;
     margin-top: 50px;
 }
+.loading-l
+{
+    font:bold 15px Segoe UI;
+    color: #111;
+}
 .wrap
 {
     position: relative;
@@ -53,9 +58,11 @@ img
     width: 200px;
     height: 30px;
     margin-top: 10px;
-    background: #eee;
-    border: 1px solid #555;
+    background: #222;
+    border: 1px solid #333;
     font-size: 19px;
+    color: #777;
+    font: bold 15px/30px Segoe UI;
 }
 .search__btn
 {
@@ -64,7 +71,10 @@ img
     position: relative;
     left: -4px;
     top:-1px;
-    font:bold 14px Tahoma;
+    font:bold 11px/34px Segoe UI;
+    background: #333;
+    border: 1px solid #222;
+    color: #777;
 }
 
 /* Album-bar */
@@ -86,16 +96,21 @@ img
 }
 .album-bar__button
 {
-    padding: 5px;
-    border: 1px solid #999;
+    border: 0;
+    background: url('../img/btn.png');
     display: block;
+    width: 69px;
+    height: 23px;
+    padding-bottom: 5px;
     margin: -1px auto -30px auto;
+    color: #777;
+    font:bold 10px Segoe UI;
 }
 .album-bar__album-element
 {
     float: left;
     width: 75px;
-    border: 5px solid #222;
+    border: 5px solid #333;
     margin-left: 12px;
     position: relative;
 }
