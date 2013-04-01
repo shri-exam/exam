@@ -21,15 +21,17 @@ img
 }
 .loading
 {
-    font:bold 18px Tahoma;
+    font:bold 18px Segoe UI, Tahoma;
     color: #999;
     text-align: center;
     margin-top: 50px;
 }
 .loading-l
 {
-    font:bold 15px Segoe UI;
+    font:bold 15px Segoe UI, Tahoma;
     color: #111;
+    text-align: center;
+    margin-top: 100px;
 }
 .wrap
 {
@@ -62,7 +64,7 @@ img
     border: 1px solid #333;
     font-size: 19px;
     color: #777;
-    font: bold 15px/30px Segoe UI;
+    font: bold 15px/30px Segoe UI, Tahoma;
 }
 .search__btn
 {
@@ -71,10 +73,11 @@ img
     position: relative;
     left: -4px;
     top:-1px;
-    font:bold 11px/34px Segoe UI;
+    font:bold 11px/34px Segoe UI, Tahoma;
     background: #333;
     border: 1px solid #222;
     color: #777;
+    cursor: pointer
 }
 
 /* Album-bar */
@@ -104,7 +107,7 @@ img
     padding-bottom: 5px;
     margin: -1px auto -30px auto;
     color: #777;
-    font:bold 10px Segoe UI;
+    font:bold 10px Segoe UI, Tahoma;
 }
 .album-bar__album-element
 {
@@ -126,7 +129,7 @@ img
 .album-bar__album-element span
 {
     background: #ccc;
-    font:10px Segoe UI;
+    font:10px Segoe UI, Tahoma;
     color: #222;
     width: 75px;
     display: block;
@@ -196,7 +199,7 @@ img
 {
     display: block;
 }
-.wr{
+.box{
  margin:30px auto 10px auto;
  border: 5px solid #eee;
  background: #333;
@@ -236,7 +239,7 @@ img
     float: right;
     margin: 10px;
 }
-.cnts
+.container__arrows
 {
     position: absolute;
     height: 80px;
