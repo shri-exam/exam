@@ -2,6 +2,8 @@ $(document).ready(function(){
 
     /* GLobal init */  
 
+    // BUG: CLOSE ALBUM-BAR WHEN image loading!!!!
+
     // preloader sprite
     $('<img>').attr('src','./img/sprites.png');
     $('.wrap').height( $('body').height()*2 );
@@ -37,29 +39,31 @@ $(document).ready(function(){
 
     function left () {
         
-        if(indexPrev-2 >= 0){    
-            $('.preview-bar img').eq(indexPrev-2).click();
+        if(indexPrev-1 >= 0){    
+            $('.preview-bar img[data-index="'+(indexPrev-1)+'"]').click();
         }
         if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-            return;
+           // return;
         }
-        
+
         photoPos -= 92;    
 
         if(photoPos < 0 ){
-             photoPos = 0;
+                photoPos = 0;
+                return 0;
         }
-        
+       
         $('.preview-bar__container').css({'left':-photoPos});
+        console.log("left - " + indexPrev);
 
     };
 
     function right () {
         
-        $('.preview-bar img').eq(indexPrev).click();
+        $('.preview-bar img[data-index="'+(indexPrev+1)+'"]').click();
         
         if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-            return;
+            //return;
         }
 
         var rightLimit = ($('.preview-bar__container').width() - photoPos)  -92;
@@ -73,6 +77,8 @@ $(document).ready(function(){
         } 
 
         $('.preview-bar__container').css({'left':-photoPos});
+        console.log("right - " + indexPrev);
+
     };  
 
 
@@ -154,21 +160,28 @@ $(document).ready(function(){
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
             var user = $('.search__input').val();
             // load photo on width screen
-             if( localStorage.getItem(user) != null ){
+             if( localStorage.getItem(user) != null){
                 var data =  ( JSON.parse( localStorage.getItem(user) ) );
-                APP.modules.YandexPhotoAPI.setCurrent( data.image );
-                loadNextPhoto(20);
-                loadPrevPhoto(10);
-                $('.preview-bar img[data-id="'+data.image+'"]').click();
-            }else{
-                loadNextPhoto( Math.round($(document).width() / 92) +20 );
-            }
+                if(data.album === idAlbum){
+                    APP.modules.YandexPhotoAPI.setCurrent( data.image );
+                    loadNextPhoto(10);
+                    loadPrevPhoto(10);
+                    //
+
+                    //
+                    $('.preview-bar img[data-id="'+data.image+'"]').click();
+                    indexPrev = $('.preview-bar img[data-id="'+data.image+'"]').data('index');
+                }else{
+                    APP.modules.YandexPhotoAPI.setCurrent( 0 );
+                    loadNextPhoto( Math.round($(document).width() / 92) +20 );
+                    indexPrev = -1;
+                    $('.preview-bar img:first').click();
+                }
+            }else    
+                indexPrev = 0;   
 
             $('.container__image-current h1').remove();
-
             $('.album-bar').delegate('img','click', loadImages);
-            indexPrev = 0;
-            //$('.preview-bar img:first').click();
             
         });
     };
@@ -195,8 +208,23 @@ $(document).ready(function(){
 
 
 
-        //if(index * 92 > $('body').width()/2)
-          //  loadNextPhoto( 10 );
+        if(index * 92 > $('body').width()/2)
+            loadNextPhoto( 10 );
+        
+        console.log(photoPos)
+        if(photoPos / 92 < 10)
+        {
+
+            var added = loadPrevPhoto(5);
+             photoPos += 92 * added;
+
+             if( added === 0){
+            //    photoPos = 0;
+
+             }
+            $('.preview-bar__container').css({'left':-photoPos});
+        }
+
 
         $('.preview-bar img').closest('div').removeClass('preview-bar__border-active');
         $(this).closest('div').addClass('preview-bar__border-active');
@@ -243,6 +271,7 @@ $(document).ready(function(){
 
         var position = ($(document).width() / 2) - (dv.width() / 2);
 
+        console.log("index - " + index + " | indexPrev - " + indexPrev)
 
         if(index > indexPrev){
             // slide next
@@ -274,7 +303,7 @@ $(document).ready(function(){
             $.when($('.container__image-prev').empty().append(dv).animate({'left':position}),200).then(function(itm){
                 $('.container__image-prev div.wr').appendTo('.container__image-current');
                 
-            });           
+            });          
         }
 
         // Preloade Larg image
@@ -319,6 +348,7 @@ $(document).ready(function(){
             });
 
         });  
+        return photos.length; 
     };
 
     // For load prev photos
