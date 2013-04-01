@@ -4,8 +4,9 @@ $(document).ready(function(){
 
     // BUG: CLOSE ALBUM-BAR WHEN image loading!!!!
 
+    var MAX_IMAGE_HEIGHT = 700;
 
-    var storage = window.localStorage;
+
 
     // preloader sprite
     $('<img>').attr('src','./img/sprites.png');
@@ -102,8 +103,13 @@ $(document).ready(function(){
         }else{
             ps = 60;
         }
-        sd = $('.container__image-current img').height( $('body').height() -ps);
-        $('.container__image-current div.wr').height( sd.height()).width( sd.width() );
+        
+        
+
+        if( $('body').height() -ps < MAX_IMAGE_HEIGHT ){
+            sd = $('.container__image-current img').height( $('body').height() -ps);
+            $('.container__image-current div.wr').height( sd.height()).width( sd.width() );
+        }
 
         $('.cnts').css({ 'top': ($('body').height()/2)+50 });
 
@@ -272,8 +278,12 @@ $(document).ready(function(){
             preloader.destroy();
 
         });//.addClass('box_shadow');
-        img.css({'height': $('body').height()-ps });
-            
+
+        if( $('body').height()-ps > MAX_IMAGE_HEIGHT)
+            img.css({'height': MAX_IMAGE_HEIGHT });
+        else
+            img.css({'height': $('body').height()-ps });
+
 
         //img.height(  );
         img.hide();
@@ -281,7 +291,7 @@ $(document).ready(function(){
         prel = $('<div class="preloader-lrg">'+preloader.getHTML()+'</div>');
         dv = $('<div style="position:relative;" class="wr">').append(img).append(prel);
                 
-        dv.height($('body').height()-ps).addClass('box_shadow');
+        dv.height( img.height() ).addClass('box_shadow');
         //dv.width($('body').height()-ps);
         dv.width(prevWidth);
 
@@ -407,6 +417,8 @@ $(document).ready(function(){
         var user = $(this).closest('div').find('input').val();
 
         $('.album-bar__items').empty();
+        $('.preview-bar__container').empty();
+        $('.preview-bar__container').empty();
         $('.album-bar__container h1.loading').remove();    
         $('.album-bar__container').append('<h1 class="loading">Loading...</h1>');    
 
@@ -448,6 +460,10 @@ $(document).ready(function(){
             }
 
 
+        }).fail(function(){
+            $('.search__btn').bind('click', searchAlbums);
+            $('.album-bar__container h1.loading').text('User not found');
+            $('.container__image-current div.wr').remove();
         });
     };
 
@@ -460,7 +476,14 @@ $(document).ready(function(){
                 $(this).text("Открыть");
                 $('.wrap').animate({top:"-180"},400);
                 $('.container__image-current img').hide();
-                sd = $('.container__image-current img').css({'height': $('body').height()-60});
+                
+                tmp  = $('body').height()-60;
+                if( tmp > MAX_IMAGE_HEIGHT)
+                    tmp = MAX_IMAGE_HEIGHT
+        
+                sd = $('.container__image-current img').css({'height': tmp});
+
+
                 $.when($('div.wr').animate({'height': sd.height(),'width':sd.width()})).then(function(){
                     $('.container__image-current img').fadeIn(200);
                 });
@@ -471,9 +494,16 @@ $(document).ready(function(){
             case "Открыть" :{
                 $(this).text("Закрыть");
                 $('.wrap').animate({top:"0"},300);
-               // $('.container__image-current div.wr').animate({'height': $('body').height() - 240},300);
                $('.container__image-current img').hide();
-                sd = $('.container__image-current img').css({'height': $('body').height()-240});
+                
+                tmp = $('body').height()-240;
+
+                
+                if( tmp > MAX_IMAGE_HEIGHT)
+                    tmp = MAX_IMAGE_HEIGHT
+        
+
+                sd = $('.container__image-current img').css({'height': tmp});
                 $.when($('div.wr').animate({'height': sd.height(),'width':sd.width()})).then(function(){
                     $('.container__image-current img').fadeIn(200);
                 });
