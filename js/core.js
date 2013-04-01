@@ -16,6 +16,7 @@ APP.modules.YandexPhotoAPI = (function() {
         format = '?format=json',
         photos = [],
         currentImage = 0;
+        currentImagePrev = 0;
 
     /*  PRIVATE METHODS */
 
@@ -24,6 +25,16 @@ APP.modules.YandexPhotoAPI = (function() {
         currentImage = 0;
     };
 
+    function searchAndSetById (id) {
+        $.each(photos,function(i,item){
+            if(id === item.id){
+                currentImage = item.index-1;
+                return;
+            }
+        });
+        currentImagePrev = currentImage-1;
+    }
+
     function getNextImages (count) {
         var imageList = [];
         var max = count + currentImage;
@@ -31,6 +42,18 @@ APP.modules.YandexPhotoAPI = (function() {
             if (photos[i]) {
                 imageList.push( photos[i] );
                 currentImage++;
+            };
+        };
+        return imageList;
+    };
+
+    function getPrevImages (count) {
+        var imageList = [];
+        var max = currentImagePrev - count+1;
+        for (i = currentImagePrev; i >= max; i--){
+            if (photos[i]) {
+                imageList.push( photos[i] );
+                currentImagePrev--;
             };
         };
         return imageList;
@@ -118,7 +141,9 @@ APP.modules.YandexPhotoAPI = (function() {
         loadAlbums: getAlbums,
         loadImages: loadImages,
         getNextImages : getNextImages,
-        clearCache : clearCache
+        getPrevImages : getPrevImages,
+        clearCache : clearCache,
+        setCurrent : searchAndSetById
     };
 })();
 

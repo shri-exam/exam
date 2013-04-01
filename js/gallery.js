@@ -14,6 +14,7 @@ $(document).ready(function(){
 
     $('.wrap').bind('mousemove', mouseMove);
     $('.preview-bar').bind('mouseleave',mouseLeave);
+    $(document).bind('mouseleave',docMouseLeave);
 
 
     $('.left').bind('click', left);
@@ -24,7 +25,14 @@ $(document).ready(function(){
 
 
     /* Realisation listeners */
+    var isArrowsShow = false;
+    $('.cnts').hide();
 
+    function docMouseLeave () {
+        // hide arrows
+        isArrowsShow = false;
+        $('.cnts').fadeOut(100);
+    }
 
 
     function left () {
@@ -71,6 +79,8 @@ $(document).ready(function(){
     var isOpenPreview = true; 
 
     $(window).resize(function(e){
+
+
         if(!isOpenPreview){
             $('.preview-bar').animate({'top': $(document).height()+200},200);  
             isOpenPreview = true;  
@@ -100,6 +110,11 @@ $(document).ready(function(){
 
 
     function mouseMove (e) {
+        
+        if(!isArrowsShow && $('.preview-bar img').size() !== 0){
+            $('.cnts').fadeIn(100);
+            isArrowsShow = true;
+        }
 
         if(e.clientY > $('body').height() - 100 && isOpenPreview){
             isOpenPreview = false;
@@ -117,8 +132,11 @@ $(document).ready(function(){
 
 
     // Load images from album
+    var idAlbum;
+
     function loadImages () {
         var url = $(this).data('photos');
+        idAlbum = $(this).parent().find('span').data('id');
 
         $('.album-bar').undelegate('img','click', loadImages);
 
@@ -134,15 +152,23 @@ $(document).ready(function(){
         $('.container__image-current').append( '<h1 style="text-align:center;margin-top:100px;">Loading photos...</h1>' );
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
-            
+            var user = $('.search__input').val();
             // load photo on width screen
-            loadNextPhoto( Math.round($(document).width() / 92) +20 );
+             if( localStorage.getItem(user) != null ){
+                var data =  ( JSON.parse( localStorage.getItem(user) ) );
+                APP.modules.YandexPhotoAPI.setCurrent( data.image );
+                loadNextPhoto(20);
+                loadPrevPhoto(10);
+                $('.preview-bar img[data-id="'+data.image+'"]').click();
+            }else{
+                loadNextPhoto( Math.round($(document).width() / 92) +20 );
+            }
 
             $('.container__image-current h1').remove();
 
             $('.album-bar').delegate('img','click', loadImages);
             indexPrev = 0;
-            $('.preview-bar img:first').click();
+            //$('.preview-bar img:first').click();
             
         });
     };
@@ -159,10 +185,18 @@ $(document).ready(function(){
         var url = $(this).data('src');
         var id = $(this).data('id');
         var index = $(this).data('index');
-
         
-        if(index * 92 > $('body').width()/2)
-            loadNextPhoto( 10 );
+        var idImage = $(this).data('id');
+        var user = $('.search__input').val();
+
+
+        // write to local storage
+        localStorage.setItem(user,JSON.stringify({'album':idAlbum,'image':idImage}));
+
+
+
+        //if(index * 92 > $('body').width()/2)
+          //  loadNextPhoto( 10 );
 
         $('.preview-bar img').closest('div').removeClass('preview-bar__border-active');
         $(this).closest('div').addClass('preview-bar__border-active');
@@ -287,6 +321,36 @@ $(document).ready(function(){
         });  
     };
 
+    // For load prev photos
+        function loadPrevPhoto (count) {
+        var photos =  APP.modules.YandexPhotoAPI.getPrevImages(count);
+        var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+
+        var count = $('.preview-bar__container').children().size() + photos.length;
+
+        $('.preview-bar__container').width( (count * 92)+10 );
+        $('.preview-bar__container').css({'margin':'0 auto'});
+
+        var preloader = new APP.modules.animation({'speed':50,'frames':12,'imagePath':'./img/sprites.png'});
+
+        $.each(photos,function(index,item) {
+            viewPreview.setParam({'index':item.index,'origin':item.original,'src':'./img/clear.png','id':item.id,'preloader':preloader.getHTML()});
+            $('.preview-bar__container').prepend( viewPreview.getHTML() );
+
+            // async image loading
+            $('<img>').attr('src',item.preview).load(function(){
+                // hide image
+                $('img[data-id="'+item.id+'"]').attr('src',item.preview).hide();
+                // show image
+                $('img[src="'+item.preview+'"]').fadeIn(1000);
+                // remove preloader animation
+                preloader.destroy();
+            });
+
+        }); 
+        return photos.length; 
+    };
+
     // Search albums of user
     function searchAlbums () {
 
@@ -327,6 +391,14 @@ $(document).ready(function(){
                 });
             });
             $('.search__btn').bind('click', searchAlbums);
+
+            // If ssave state
+            if( localStorage.getItem(user) != null ){
+                var data =  ( JSON.parse( localStorage.getItem(user) ) );
+                $('span[data-id="'+data.album+'"]').parent().find('img').click();
+            }
+
+
         });
     };
 
@@ -396,8 +468,13 @@ $(document).ready(function(){
         
         // if left limit
         if(photoPos < 0 ){
-             photoPos = 0;
-             return 0;
+             var added = loadPrevPhoto(5);
+             photoPos += 92 * added;
+
+             if( added === 0){
+                photoPos = 0;
+                return 0;
+             }
         }
  
         // calculate right limit
