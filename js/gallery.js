@@ -1,222 +1,237 @@
 $(document).ready(function(){
 
-    /* GLobal init */  
-
-    // BUG: CLOSE ALBUM-BAR WHEN image loading!!!!
-
-    var MAX_IMAGE_HEIGHT = 700;
-
-
-
     // preloader sprite
     $('<img>').attr('src','./img/sprites.png');
-    $('.wrap').height( $('body').height()*2 );
+    $('<img>').attr('src','./img/sprites-lar.png');
+    
+    /* Constanst */
+    var MAX_IMAGE_HEIGHT = 700;
+
+    /* Variables */
+
+    // elements
+    var doc =                   $(document);
+    var body =                  $('body');
+    var wrap =                  $('.wrap');
+    var previewBar =            $('.preview-bar');
+    var previewBarContainer =   $('.preview-bar__container');
+    var albumBar =              $('.album-bar');
+    var slideBtn =              $('.album-bar__button');
+    var searchInput =           $('.search__input');
+    var searchBtn =             $('.search__btn');
+    var albumBarItems =         $('.album-bar__items');
+    var albumBarContainer =     $('.album-bar__container');
+    var leftBtn =               $('.left');
+    var rightBtn =              $('.right');
+    var containerArrows =       $('.container__arrows');
+    var containerImageCurrent = $('.container__image-current');
+    var containerImageNext =    $('.container__image-next');
+    var containerImagePrev =    $('.container__image-prev');
+    var textLoadingAlbums =     $('<h1>Loading photos...</h1>').addClass('loading-l');
+    var textLoadingPhotos =     $('<h1>Loading...</h1>').addClass('loading');
+
+    // properties
+    var isArrowsShow =          false;
+    var isOpenPreview =         true; 
+    var prevImage =             null;
+    var previewBarImageWidth =  92;
+    var previewBarTopOffet =    200;
+    var albumBarCloseHeight =   60;
+    var albumBarOpenHeight =    240;
+    var previewBarArea =        100;
+    var indexPrev =             0;
+    var prevWidth =             200;
+    var maxPreloadeLeftRight =  10; // when scroll
+    var largePreloadeHalf =     64;
+    var photoPos =              0;
+    var photoStep =             30;
+    var albumPos =              0;
+    var albumScrollStep =       50;
+    var preloadingPreviewsCount = 20; //  when document loading
+    var limitToLoad = previewBarImageWidth * 5; // Elements count to begin or end 
+    var idAlbum;
+
+    /* Default set */
+    wrap.height( body.height() * 2 );
+    containerArrows.css({ 'top': ( body.height() / 2 ) +50 });
 
     /* Event listeners */
-    $('.album-bar__button').bind('click', toggleAlbumBar);
-    $('.search__btn').bind('click', searchAlbums);
-    $('.album-bar').delegate('img','click', loadImages);
-    $('.preview-bar').delegate('img','click', loadLargeImages);
+    slideBtn.bind('click', toggleAlbumBar);
+    searchBtn.bind('click', searchAlbums);
 
-    $('.wrap').bind('mousemove', mouseMove);
-    $('.preview-bar').bind('mouseleave',mouseLeave);
-    $(document).bind('mouseleave',docMouseLeave);
+    albumBar.delegate('img','click', loadImages);
+    previewBar.delegate('img','click', loadLargeImages);
 
+    leftBtn.bind('click', left);
+    rightBtn.bind('click', right);
 
-    $('.left').bind('click', left);
-    $('.right').bind('click', right);
+    /* global events */
+    previewBar.bind('mouseleave',mouseLeavePreviewBar);
+    doc.bind('mousemove', mouseMoveDoc);
+    doc.bind('mouseleave',docMouseLeave);
 
-    // arrow
-    $('.cnts').css({ 'top': ($('body').height()/2)+50 });
 
 
     /* Realisation listeners */
-    var isArrowsShow = false;
-    $('.cnts').hide();
+    
+    containerArrows.hide();
 
+    // Mouse leave from document
     function docMouseLeave () {
         // hide arrows
         isArrowsShow = false;
-        $('.cnts').fadeOut(100);
+        containerArrows.fadeOut(100);
+    }
+
+    // left arrow handler
+    function left () {
+        // if image not first then click ob next photo
+        if ( indexPrev-1 >= 0 ) {    
+            previewBar.find('img[data-index="'+(indexPrev-1)+'"]').click();
+        }
+        photoPos -= previewBarImageWidth;    
+        // stop scrolling if next -1
+        if ( photoPos < 0 ) {
+            photoPos = 0;
+            return 0;
+        }
+        // scroll
+        previewBarContainer.css({'left':-photoPos});
+    }
+
+    // right arrow handler
+    function right () {
+        // click on prev image
+        previewBar.find('img[data-index="'+(indexPrev+1)+'"]').click();
+        // if end image list
+        if ( previewBar.find('img').size() * previewBarImageWidth < doc.width()   ) {
+            return;
+        }
+        // right limit 
+        var rightLimit = (previewBarContainer.width() - photoPos) - previewBarImageWidth;
+        // if end image list  
+        if( rightLimit < doc.width() ){
+            photoPos = (previewBarContainer.width()-doc.width() );
+        } 
+        // scroll
+        previewBarContainer.css({'left':-photoPos});
+    }
+       
+    /* Window resize */
+    $(window).resize(function (e) {
+
+        if(!isOpenPreview){
+            previewBar.animate({'top': doc.height()+previewBarTopOffet},200);  
+            isOpenPreview = true;  
+        }
+        previewBar.css({'top': doc.height()+previewBarTopOffet});
+                
+        var offsetTop = wrap.offset().top;
+        if(offsetTop === 0){
+            offsetTop = albumBarOpenHeight; 
+        }else{
+            offsetTop = albumBarCloseHeight;
+        }
+
+        if( body.height() - offsetTop < MAX_IMAGE_HEIGHT ){
+            var current = containerImageCurrent.find('img').height( body.height() - offsetTop );
+            containerImageCurrent.find('div.box').height( current.height()).width( current.width() );
+        }
+        containerArrows.css({ 'top': ( body.height() / 2 ) + 50 });
+    });
+
+    /* Mouse leave from preview-bar */
+    function mouseLeavePreviewBar (e) {
+        isOpenPreview = true;
+        previewBar.animate({'top': body.height() + previewBarTopOffet },200);
+    }
+
+    /* Mouse move on document */
+    function mouseMoveDoc (e) {
+        if (!isArrowsShow && previewBar.find('img').size() !== 0){
+            containerArrows.fadeIn(100);
+            isArrowsShow = true;
+        }
+        if (e.clientY > body.height() - previewBarArea && isOpenPreview ) {
+            isOpenPreview = false;
+            previewBar.css({'top': body.height() + previewBarArea });
+            previewBar.animate({'top': body.height() - previewBarArea },200);
+        }
+        if(e.clientY < body.height() - previewBarArea && !isOpenPreview){
+            isOpenPreview = true;
+            previewBar.animate({'top': body.height() + previewBarTopOffet },200);
+        }
     }
 
 
-    function left () {
-        
-        if(indexPrev-1 >= 0){    
-            $('.preview-bar img[data-index="'+(indexPrev-1)+'"]').click();
-        }
-        if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-            return;
-        }
-
-        photoPos -= 92;    
-
-        if(photoPos < 0 ){
-                photoPos = 0;
-                return 0;
-        }
-       
-        $('.preview-bar__container').css({'left':-photoPos});
-
-    };
-
-    function right () {
-        
-        $('.preview-bar img[data-index="'+(indexPrev+1)+'"]').click();
-        
-        if( $('.preview-bar img').size() * 92 < $(document).width()  ){
-            return;
-        }
-
-        var rightLimit = ($('.preview-bar__container').width() - photoPos)  -92;
-        
-        if( indexPrev * 92 >  $(document).width()/2){
-            photoPos += 92;
-        }
-
-        if( rightLimit < $(document).width()){
-            photoPos = ($('.preview-bar__container').width()-$(document).width());
-        } 
-
-        $('.preview-bar__container').css({'left':-photoPos});
-
-
-    };  
-
-
-    var isOpenPreview = true; 
-
-    $(window).resize(function(e){
-
-
-        if(!isOpenPreview){
-            $('.preview-bar').animate({'top': $(document).height()+200},200);  
-            isOpenPreview = true;  
-        }
-        $('.preview-bar').css({'top':$(document).height()+200});
-        //
-        // temporary        
-        var ps = $('.wrap').offset().top;
-        if(ps === 0){
-            ps = 240 
-        }else{
-            ps = 60;
-        }
-        
-        
-
-        if( $('body').height() -ps < MAX_IMAGE_HEIGHT ){
-            sd = $('.container__image-current img').height( $('body').height() -ps);
-            $('.container__image-current div.wr').height( sd.height()).width( sd.width() );
-        }
-
-        $('.cnts').css({ 'top': ($('body').height()/2)+50 });
-
-        /////// LIMIT FOR MAXIMIZATION IMAGE!!!
-    });
-
-     
-    function mouseLeave (e) {
-        isOpenPreview = true;
-        $('.preview-bar').animate({'top': $('body').height()+200},200);
-    };
-
-
-    function mouseMove (e) {
-        
-        if(!isArrowsShow && $('.preview-bar img').size() !== 0){
-            $('.cnts').fadeIn(100);
-            isArrowsShow = true;
-        }
-
-        if(e.clientY > $('body').height() - 100 && isOpenPreview){
-            isOpenPreview = false;
-            $('.preview-bar').css({'top': $('body').height()+100 });
-            $('.preview-bar').animate({'top': $('body').height()-100},200);
-        }
-        if(e.clientY < $('body').height() - 100 && !isOpenPreview){
-            isOpenPreview = true;
-            $('.preview-bar').animate({'top': $('body').height()+200},200);
-        }
-
-    };
-
-
-
-
     // Load images from album
-    var idAlbum;
-
+    
     function loadImages () {
         var url = $(this).data('photos');
         idAlbum = $(this).parent().find('span').data('id');
 
-        $('.album-bar').undelegate('img','click', loadImages);
+        albumBar.undelegate('img','click', loadImages);
 
-        $('.container__image-current div.wr').remove();
+        containerImageCurrent.find('div.box').remove();
         
-        $('.album-bar img').closest('div').removeClass('act');
+        albumBar.find('img').closest('div').removeClass('act');
         $(this).closest('div').addClass('act');
 
         APP.modules.YandexPhotoAPI.clearCache();
-        $('.preview-bar__container').empty();
-        $('.preview-bar__container').css({'left':'0'});
+        previewBarContainer.empty();
+        previewBarContainer.css({'left':'0'});
 
-        $('.container__image-current').append( '<h1 style="text-align:center;margin-top:100px;">Loading photos...</h1>' ).addClass('loading-l');
+        containerImageCurrent.append( textLoadingAlbums );
 
         $.when( APP.modules.YandexPhotoAPI.loadImages( url ) ).then(function(){
-            var user = $('.search__input').val();
-            // load photo on width screen
+            var user = searchInput.val();
+             
+            // if user data saved
              if( localStorage.getItem(user) != null){
                 var data =  ( JSON.parse( localStorage.getItem(user) ) );
-                if(data.album === idAlbum){
-                    APP.modules.YandexPhotoAPI.setCurrent( data.image );
-                    var nextLoaded = loadNextPhoto(20);
-                    var prevLoaded = loadPrevPhoto(20);
-                    $('.preview-bar img[data-id="'+data.image+'"]').click();
-                    indexPrev = $('.preview-bar img[data-id="'+data.image+'"]').data('index');
-
-                    var search = $('.preview-bar img[data-id="'+data.image+'"]').parent();
-                    var cn = ($('.preview-bar div.preview-bar__border').index( search )  * 92) - ($(document).width() / 2);
-                    photoPos = cn;
+                if (data.album === idAlbum) {
                     
-                    if( nextLoaded  * 92 < $(document).width() / 2)
+                    APP.modules.YandexPhotoAPI.setCurrent( data.image );
+                    
+                    var nextLoaded = loadNextPhoto(preloadingPreviewsCount); 
+                    var prevLoaded = loadPrevPhoto(preloadingPreviewsCount);
+                    
+                    previewBar.find('img[data-id="'+data.image+'"]').click();
+                    indexPrev = previewBar.find('img[data-id="'+data.image+'"]').data('index');
+
+                    var search = previewBar.find('img[data-id="'+data.image+'"]').parent();
+                    var centred = ( previewBar.find('div.preview-bar__border').index( search )  * previewBarImageWidth) - (doc.width()  / 2);
+                    
+                    photoPos = centred;
+                    
+                    if( nextLoaded  * previewBarImageWidth < doc.width()  / 2)
                     {
-                       cn = $('.preview-bar__container').width()- $(document).width();
-                       photoPos = cn;
+                        photoPos = previewBarContainer.width()- doc.width();
                     }
-                    if( prevLoaded * 92 < $(document).width() / 2 ){
-                        cn = photoPos = 0;
+                    if( prevLoaded * previewBarImageWidth < doc.width()  / 2 ){
+                        photoPos = 0;
                     }
-
-                    $('.preview-bar__container').css({'left':-(cn)});
-                }else{
-                    APP.modules.YandexPhotoAPI.setCurrent( 0 );
-                    loadNextPhoto( Math.round($(document).width() / 92) +20 );
-                    indexPrev = -1;
-                    $('.preview-bar img:first').click();    
+                    previewBarContainer.css({'left':-photoPos});
+                } else {
+                    userFirstTime();       
                 }
-            }else{
-                    APP.modules.YandexPhotoAPI.setCurrent( 0 );
-                    loadNextPhoto( Math.round($(document).width() / 92) +20 );
-                    indexPrev = -1;
-                    $('.preview-bar img:first').click();    
-
+            } else {
+                userFirstTime();
             }
-
-            $('.container__image-current h1').remove();
-            $('.album-bar').delegate('img','click', loadImages);
-            
+            containerImageCurrent.find('h1').remove();
+            albumBar.delegate('img','click', loadImages);
         });
-    };
+    }
 
+    /* for new user */
+    function userFirstTime () {
+        APP.modules.YandexPhotoAPI.setCurrent( 0 );
+        loadNextPhoto( Math.round(doc.width()  / previewBarImageWidth) +20 );
+        indexPrev = -1;
+        previewBar.find('img:first').click();   
+    }
     // Load large images
-    var indexPrev = 0;
-    var prevImage = null;
-    var prevWidth = 200;
-    var maxPreloadeLeftRight = 5;
-
+    
     function loadLargeImages () {
 
 
@@ -225,47 +240,35 @@ $(document).ready(function(){
         var index = $(this).data('index');
         
         var idImage = $(this).data('id');
-        var user = $('.search__input').val();
-
+        var user = searchInput.val();
 
         // write to local storage
         localStorage.setItem(user,JSON.stringify({'album':idAlbum,'image':idImage}));
 
-
-
-        if(index * 92 > $('body').width()/2)
+        if ( index * previewBarImageWidth > body.width() / 2 )
             loadNextPhoto( 10 );
         
-        console.log(photoPos)
-        if(photoPos / 92 < 10)
+        if ( photoPos / previewBarImageWidth < 10)
         {
-
             var added = loadPrevPhoto(5);
-             photoPos += 92 * added;
+            photoPos += previewBarImageWidth * added;
 
-             if( added === 0){
-            //    photoPos = 0;
-
-             }
-            $('.preview-bar__container').css({'left':-photoPos});
+            previewBarContainer.css({'left':-photoPos});
         }
 
-
-        $('.preview-bar img').closest('div').removeClass('preview-bar__border-active');
+        previewBar.find('img').closest('div').removeClass('preview-bar__border-active');
         $(this).closest('div').addClass('preview-bar__border-active');
 
         if( index === indexPrev ){
             return 0;
         }
         
-        // temporary        
-        var ps = $('.wrap').offset().top;
-        if(ps === 0){
-            ps = 240 
-        }else{
-            ps = 60;
+        var offsetTop = wrap.offset().top;
+        if ( offsetTop === 0 ) {
+            offsetTop = albumBarOpenHeight;
+        } else {
+            offsetTop = 610;
         }
-
 
         var preloader = new APP.modules.animation({'width':128,'height':128,'speed':50,'frames':12,'imagePath':'./img/sprites-lar.png'});
 
@@ -273,97 +276,86 @@ $(document).ready(function(){
             
             img.css({'width':'auto'});
             img.fadeIn(2000);
-            $('.wr').animate({'width':img.width(),'height':img.height()},700);
+            $('.box').animate({'width':img.width(),'height':img.height()},700);
             prevWidth = img.width();
             preloader.destroy();
 
-        });//.addClass('box_shadow');
+        });
 
-        if( $('body').height()-ps > MAX_IMAGE_HEIGHT)
+        if( body.height()-offsetTop > MAX_IMAGE_HEIGHT) {
             img.css({'height': MAX_IMAGE_HEIGHT });
-        else
-            img.css({'height': $('body').height()-ps });
+        } else {
+            img.css({'height': body.height()-offsetTop });
+        }
 
-
-        //img.height(  );
         img.hide();
-
+        // prepare box with preloader
         prel = $('<div class="preloader-lrg">'+preloader.getHTML()+'</div>');
-        dv = $('<div style="position:relative;" class="wr">').append(img).append(prel);
-                
-        dv.height( img.height() ).addClass('box_shadow');
-        //dv.width($('body').height()-ps);
-        dv.width(prevWidth);
+        box = $('<div style="position:relative;" class="box">').append(img).append(prel);
+        box.height( img.height() ).addClass('box_shadow');
+        box.width(prevWidth);
+        prel.css({'left':(box.width()/ 2) - largePreloadeHalf, 'top':box.height()/2 - largePreloadeHalf });
 
-        prel.css({'left':(dv.width()/2) - 64, 'top':dv.height()/2 -64 });
+        // center position 
+        var position = (doc.width()  / 2) - ( box.width() / 2);
 
-
-        var position = ($(document).width() / 2) - (dv.width() / 2);
-
-
-        if(index > indexPrev){
+        if ( index > indexPrev ) {
             // slide next
-            $('.container__image-next').css({'left': $(document).width()  });
-            if($('.container__image-current img').size()>0){   
-                $('.container__image-prev').empty().css({'left':position});
-                $('.container__image-current div.wr').appendTo('.container__image-prev');
-                $.when($('.container__image-prev').animate({'left': - $('.container__image-current img').width() }),200).then(function(){
-                    $('.container__image-prev').empty();
+            containerImageNext.css({ 'left': doc.width() });
+            if ( containerImageCurrent.find('img').size() > 0 ) {   
+                containerImagePrev.empty().css({ 'left':position });
+                containerImageCurrent.find('div.box').appendTo( containerImagePrev );
+                $.when( containerImagePrev.animate({ 'left': - containerImageCurrent.find('img').width() }),200).then(function(){
+                    containerImagePrev.empty();
                 });
             }
-
-            $.when($('.container__image-next').empty().append(dv).animate({'left':position}),200).then(function(itm){
-                $('.container__image-next div.wr').appendTo('.container__image-current');
-                
+            $.when( containerImageNext.empty().append(box).animate({ 'left':position }),200).then(function(itm){
+                containerImageNext.find('div.box').appendTo( containerImageCurrent );
             });   
 
         }else{
             // slide prev
-            $('.container__image-prev').css({'left': - $('.container__image-current img').width()  });
-            if($('.container__image-current img').size()>0){   
-                $('.container__image-next').empty().css({'left':position});
-                $('.container__image-current div.wr').appendTo('.container__image-next');
-                $.when($('.container__image-next').animate({'left': $(document).width() }),200).then(function(){
-                    $('.container__image-next').empty();
+            containerImagePrev.css({'left': - containerImageCurrent.find('img').width()  });
+            if(containerImageCurrent.find('img').size()>0){   
+                containerImageNext.empty().css({'left':position});
+                containerImageCurrent.find('div.box').appendTo( containerImageNext );
+                $.when( containerImageNext.animate({'left': doc.width()  }),200).then(function(){
+                    containerImageNext.empty();
                 });
             }
 
-            $.when($('.container__image-prev').empty().append(dv).animate({'left':position}),200).then(function(itm){
-                $('.container__image-prev div.wr').appendTo('.container__image-current');
-                
+            $.when(containerImagePrev.empty().append(box).animate({'left':position}),200).then(function(itm){
+                containerImagePrev.find('div.box').appendTo( containerImageCurrent );
             });          
         }
 
         // Preloade Larg image
-        for(i=index-maxPreloadeLeftRight;i<=index+maxPreloadeLeftRight-1;i++){
+        for ( i = index - maxPreloadeLeftRight; i <= index + maxPreloadeLeftRight - 1; i++ ) {
              
-            if(i<0) continue;
-            if(i> $('.preview-bar img').size()) continue;
-            
-            var url = $('.preview-bar img').eq(i).data('src'); 
+            if ( i < 0 ) continue;
+            if ( i > previewBar.find('img').size() ) continue;
+            var url = previewBar.find('img').eq(i).data('src'); 
             $('<img>').attr('src',url).load(function(){
                 // loading
             });
         }
-
         indexPrev = index;
-    };
+    }
 
     // For load next photo
     function loadNextPhoto (count) {
         var photos =  APP.modules.YandexPhotoAPI.getNextImages(count);
         var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+        var count = previewBarContainer.children().size() + photos.length;
 
-        var count = $('.preview-bar__container').children().size() + photos.length;
-
-        $('.preview-bar__container').width( (count * 92)+10 );
-        $('.preview-bar__container').css({'margin':'0 auto'});
+        previewBarContainer.width( (count * previewBarImageWidth)+10 );
+        previewBarContainer.css({'margin':'0 auto'});
 
         var preloader = new APP.modules.animation({'speed':50,'frames':12,'imagePath':'./img/sprites.png'});
 
         $.each(photos,function(index,item) {
             viewPreview.setParam({'index':item.index,'origin':item.original,'src':'./img/clear.png','id':item.id,'preloader':preloader.getHTML()});
-            $('.preview-bar__container').append( viewPreview.getHTML() );
+            previewBarContainer.append( viewPreview.getHTML() );
 
             // async image loading
             $('<img>').attr('src',item.preview).load(function(){
@@ -377,23 +369,22 @@ $(document).ready(function(){
 
         });  
         return photos.length; 
-    };
+    }
 
     // For load prev photos
-        function loadPrevPhoto (count) {
+    function loadPrevPhoto (count) {
         var photos =  APP.modules.YandexPhotoAPI.getPrevImages(count);
         var viewPreview = new APP.modules.JStpl('templates.preview-bar__container-item-templ');
+        var count = previewBarContainer.children().size() + photos.length;
 
-        var count = $('.preview-bar__container').children().size() + photos.length;
-
-        $('.preview-bar__container').width( (count * 92)+10 );
-        $('.preview-bar__container').css({'margin':'0 auto'});
+        previewBarContainer.width( (count * previewBarImageWidth)+10 );
+        previewBarContainer.css({'margin':'0 auto'});
 
         var preloader = new APP.modules.animation({'speed':50,'frames':12,'imagePath':'./img/sprites.png'});
 
         $.each(photos,function(index,item) {
             viewPreview.setParam({'index':item.index,'origin':item.original,'src':'./img/clear.png','id':item.id,'preloader':preloader.getHTML()});
-            $('.preview-bar__container').prepend( viewPreview.getHTML() );
+            previewBarContainer.prepend( viewPreview.getHTML() );
 
             // async image loading
             $('<img>').attr('src',item.preview).load(function(){
@@ -412,21 +403,21 @@ $(document).ready(function(){
     // Search albums of user
     function searchAlbums () {
 
-        $('.search__btn').unbind('click', searchAlbums);
+        searchBtn.unbind('click', searchAlbums);
 
         var user = $(this).closest('div').find('input').val();
 
-        $('.album-bar__items').empty();
-        $('.preview-bar__container').empty();
-        $('.preview-bar__container').empty();
-        $('.album-bar__container h1.loading').remove();    
-        $('.album-bar__container').append('<h1 class="loading">Loading...</h1>');    
+        albumBarItems.empty();
+        previewBarContainer.empty();
+        previewBarContainer.empty();
+        albumBarContainer.find('h1.loading').remove();    
+        albumBarContainer.append(textLoadingPhotos);    
 
         $.when( APP.modules.YandexPhotoAPI.loadAlbums( user ) ).then(function(albums){
             // setup albums container        
-            $('.album-bar__container h1.loading').remove();
-            $('.album-bar__items').width( (albums.length * 97)+20 );        
-            $('.album-bar__items').css({"margin":"20px auto"});        
+            albumBarContainer.find('h1.loading').remove();
+            albumBarItems.width( (albums.length * 97)+20 );        
+            albumBarItems.css({"margin":"20px auto"});        
      
             // create view
             var viewBarElement = new APP.modules.JStpl('templates.album-bar__items__item-templ');
@@ -438,7 +429,7 @@ $(document).ready(function(){
                 // templating
                 viewBarElement.setParam({'photos':item.href, 'id' : item.id, 'imageCount' : item.count,'src':'./img/clear.png','preloader': preloader.getHTML()});
                 // add template to DOM
-                $('.album-bar__items').append( viewBarElement.getHTML() );
+                albumBarItems.append( viewBarElement.getHTML() );
                 
                 // async image loading
                 $('<img>').attr('src',item.image).load(function(){
@@ -450,7 +441,7 @@ $(document).ready(function(){
                     preloader.destroy();
                 });
             });
-            $('.search__btn').bind('click', searchAlbums);
+            searchBtn.bind('click', searchAlbums);
 
             // If ssave state
 
@@ -461,12 +452,11 @@ $(document).ready(function(){
 
 
         }).fail(function(){
-            $('.search__btn').bind('click', searchAlbums);
-            $('.album-bar__container h1.loading').text('User not found');
-            $('.container__image-current div.wr').remove();
+            searchBtn.bind('click', searchAlbums);
+            albumBarContainer.find('h1.loading').text('User not found');
+            containerImageCurrent.find('div.box').remove();
         });
-    };
-
+    }
 
     // Toggle albums panel
     function toggleAlbumBar ( event ) {
@@ -474,82 +464,75 @@ $(document).ready(function(){
         switch( $(this).text() ){
             case "Закрыть" :{
                 $(this).text("Открыть");
-                $('.wrap').animate({top:"-180"},400);
-                $('.container__image-current img').hide();
+                wrap.animate({top:"-180"},400);
+                containerImageCurrent.find('img').hide();
                 
-                tmp  = $('body').height()-60;
-                if( tmp > MAX_IMAGE_HEIGHT)
-                    tmp = MAX_IMAGE_HEIGHT
+                var currentHeight  = body.height() - albumBarCloseHeight;
+                if( currentHeight > MAX_IMAGE_HEIGHT ) {
+                    currentHeight = MAX_IMAGE_HEIGHT;
+                }    
         
-                sd = $('.container__image-current img').css({'height': tmp});
+                var image = containerImageCurrent.find('img').css({'height': currentHeight});
 
-
-                $.when($('div.wr').animate({'height': sd.height(),'width':sd.width()})).then(function(){
-                    $('.container__image-current img').fadeIn(200);
+                $.when($('div.box').animate({'height': image.height(),'width':image.width()})).then(function(){
+                    containerImageCurrent.find('img').fadeIn(200);
                 });
-                
 
                 break;
             }
             case "Открыть" :{
                 $(this).text("Закрыть");
                 $('.wrap').animate({top:"0"},300);
-               $('.container__image-current img').hide();
+                containerImageCurrent.find('img').hide();
                 
-                tmp = $('body').height()-240;
+                currentHeight = body.height() - albumBarOpenHeight;
 
-                
-                if( tmp > MAX_IMAGE_HEIGHT)
-                    tmp = MAX_IMAGE_HEIGHT
+                if( currentHeight > MAX_IMAGE_HEIGHT ) {
+                    currentHeight = MAX_IMAGE_HEIGHT;
+                }    
         
-
-                sd = $('.container__image-current img').css({'height': tmp});
-                $.when($('div.wr').animate({'height': sd.height(),'width':sd.width()})).then(function(){
-                    $('.container__image-current img').fadeIn(200);
+                var image = containerImageCurrent.find('img').css({'height': currentHeight});
+                $.when($('div.box').animate({'height': image.height(),'width':image.width()})).then(function(){
+                    containerImageCurrent.find('img').fadeIn(200);
                 });
             }
         }
-    };
+    }
 
     /* Global events */
 
     // SCROLL ALBUMS EVENT
-    var pos = 0;
-    var step = 50;
-    APP.modules.horizontalScroll.addListener('.album-bar',function(delta){
+    APP.modules.horizontalScroll.addListener( albumBar ,function(delta){
         
         // if left limit
-        if(pos < 0 ){
-             pos = 0;
+        if(albumPos < 0 ){
+             albumPos = 0;
              return 0;
         }
          
         // calculate right limit
-        var rightLimit = (pos - $('.album-bar__items').width()) * -1;
+        var rightLimit = (albumPos - albumBarItems.width()) * -1;
         
         // if right limit
-        if( rightLimit < $(document).width()){
-            pos = ($('.album-bar__items').width()-$(document).width());
+        if( rightLimit < doc.width() ){
+            albumPos = (albumBarItems.width()-doc.width() );
             return 0;
         }   
 
         // scroll container
-        $('.album-bar__items').css({'left':-pos});
-        // calculate pos
-        (delta > 0) ? pos += step : pos -= step;
+        albumBarItems.css({'left':-albumPos});
+        // calculate albumPos
+        (delta > 0) ? albumPos += albumScrollStep : albumPos -= albumScrollStep;
 
     });
 
     // SCROLL PHOTOS EVENT
-    var photoPos = 0;
-    var photoStep = 30;
-    var limitToLoad = 92 * 1; // elements-width * limit count 
-    APP.modules.horizontalScroll.addListener('.preview-bar',function(delta){
+    APP.modules.horizontalScroll.addListener( previewBar ,function(delta){
         
         // if left limit
         if(photoPos < 0 ){
-             var added = loadPrevPhoto(5);
-             photoPos += 92 * added;
+             var added = loadPrevPhoto( maxPreloadeLeftRight );
+             photoPos += previewBarImageWidth * added;
 
              if( added === 0){
                 photoPos = 0;
@@ -558,20 +541,20 @@ $(document).ready(function(){
         }
  
         // calculate right limit
-        var rightLimit = ($('.preview-bar__container').width() - photoPos);
+        var rightLimit = (previewBarContainer.width() - photoPos);
         
         // if right limit
-        if( rightLimit < $(document).width()){
-            photoPos = ($('.preview-bar__container').width()-$(document).width());
+        if( rightLimit < doc.width() ){
+            photoPos = (previewBarContainer.width()-doc.width() );
             return 0;
         }   
         // if right limit
-        if( rightLimit < $(document).width() + limitToLoad){
-            loadNextPhoto(10);
+        if( rightLimit < doc.width()  + limitToLoad){
+            loadNextPhoto( maxPreloadeLeftRight );
         }   
 
         // scroll container
-        $('.preview-bar__container').css({'left':-photoPos});
+        previewBarContainer.css({'left':-photoPos});
         // calculate photoPos
         (delta > 0) ? photoPos += photoStep : photoPos -= photoStep;
 
