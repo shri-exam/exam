@@ -107,6 +107,7 @@ $(document).ready(function(){
         if ( previewBar.find('img').size() * previewBarImageWidth < doc.width()   ) {
             return;
         }
+        photoPos += previewBarImageWidth;
         // right limit 
         var rightLimit = (previewBarContainer.width() - photoPos) - previewBarImageWidth;
         // if end image list  
@@ -267,7 +268,7 @@ $(document).ready(function(){
         if ( offsetTop === 0 ) {
             offsetTop = albumBarOpenHeight;
         } else {
-            offsetTop = 610;
+            offsetTop = 60;
         }
 
         var preloader = new APP.modules.animation({'width':128,'height':128,'speed':50,'frames':12,'imagePath':'./img/sprites-lar.png'});
