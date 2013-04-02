@@ -212,6 +212,11 @@ $(document).ready(function(){
                     if( prevLoaded * previewBarImageWidth < doc.width()  / 2 ){
                         photoPos = 0;
                     }
+                    
+                    if ( previewBarContainer.size() * previewBarImageWidth < doc.width() ) {
+                        photoPos = 0;
+                    }
+
                     previewBarContainer.css({'left':-photoPos});
                 } else {
                     userFirstTime();       
